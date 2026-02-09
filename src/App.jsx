@@ -394,7 +394,9 @@ const ProductHub = ({ data, setData }) => {
         </div>
         <FormField label="Content"><Input textarea value={editSpec.content} onChange={v => setEditSpec({ ...editSpec, content: v })} /></FormField>
         <FormField label="Google Drive Link"><DriveLink link={editSpec.driveLink} onChange={v => setEditSpec({ ...editSpec, driveLink: v })} /></FormField>
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}><Btn onClick={() => setEditSpec(null)}>Cancel</Btn><Btn primary onClick={() => saveSpec(editSpec)}>Save</Btn></div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
+          {editSpec.id && <Btn danger onClick={() => { setData(d => ({ ...d, specs: d.specs.filter(x => x.id !== editSpec.id) })); setEditSpec(null); }}>{Icons.trash} Delete</Btn>}
+          <Btn onClick={() => setEditSpec(null)}>Cancel</Btn><Btn primary onClick={() => saveSpec(editSpec)}>Save</Btn></div>
       </Modal>}
       {editDec && <Modal title={editDec.id ? "Edit Decision" : "Log Decision"} onClose={() => setEditDec(null)}>
         <FormField label="Decision"><Input value={editDec.decision} onChange={v => setEditDec({ ...editDec, decision: v })} /></FormField>
@@ -403,7 +405,9 @@ const ProductHub = ({ data, setData }) => {
           <FormField label="Decided By"><Input value={editDec.decidedBy} onChange={v => setEditDec({ ...editDec, decidedBy: v })} /></FormField>
           <FormField label="Status"><Select value={editDec.status} onChange={v => setEditDec({ ...editDec, status: v })} options={[{ value: "pending", label: "Pending" }, { value: "approved", label: "Approved" }, { value: "revisit", label: "Revisit" }]} /></FormField>
         </div>
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}><Btn onClick={() => setEditDec(null)}>Cancel</Btn><Btn primary onClick={() => saveDec(editDec)}>Save</Btn></div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
+          {editDec.id && <Btn danger onClick={() => { setData(d => ({ ...d, techDecisions: d.techDecisions.filter(x => x.id !== editDec.id) })); setEditDec(null); }}>{Icons.trash} Delete</Btn>}
+          <Btn onClick={() => setEditDec(null)}>Cancel</Btn><Btn primary onClick={() => saveDec(editDec)}>Save</Btn></div>
       </Modal>}
     </div>
   );
