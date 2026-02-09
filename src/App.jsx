@@ -769,6 +769,20 @@ const FinancialModule = ({ data, setData }) => {
         <KPI label="Wtd Pipeline" value={`$${(weightedPipeline / 1e6).toFixed(1)}M`} sub="from CRM" accent={T.gold} />
       </div>
 
+      {/* Embedded Financial Model */}
+      <Card style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <SectionTitle>Financial Model — Live</SectionTitle>
+          <a href="https://docs.google.com/spreadsheets/d/1DnV6ExU8zyHENN0FgxDDjkVrJO7nzEqj/edit?usp=drive_link&ouid=109350579601617179499&rtpof=true&sd=true" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12, color: T.accent, textDecoration: "none", fontFamily: "'Outfit', sans-serif" }}>{Icons.link} Open Full Sheet</a>
+        </div>
+        <iframe
+          src="https://docs.google.com/spreadsheets/d/1DnV6ExU8zyHENN0FgxDDjkVrJO7nzEqj/preview"
+          style={{ width: "100%", height: 500, border: `1px solid ${T.border}`, borderRadius: 8, background: T.surface }}
+          title="CMR.AI Financial Model"
+          allow="autoplay"
+        />
+      </Card>
+
       {/* Google Drive Models */}
       <div style={{ marginBottom: 24 }}>
         <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
