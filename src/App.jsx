@@ -33,6 +33,7 @@ const Icons = {
   arrowRight: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
   target: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
   chart: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>,
+  timeline: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v20"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/><path d="M14 5h6M14 12h4M14 19h5"/></svg>,
 };
 
 // ─── Default Data ───
@@ -43,6 +44,54 @@ const defaultData = {
     { id: 3, title: "SocGen Pilot Kickoff", date: "2026-04-01", status: "upcoming", module: "crm" },
     { id: 4, title: "Portfolio Agent Live Demo", date: "2026-03-01", status: "in_progress", module: "product" },
     { id: 5, title: "Seed Round ($4M)", date: "2026-09-01", status: "upcoming", module: "investor" },
+  ],
+  roadmap: [
+    { id: 1, phase: "Company Formation & Planning", period: "Feb'26", color: "#4f8ff7", items: [
+      { id: 101, when: "Feb'26", activity: "Confirm CTO and finalize Founding Team, Roles and Proposed Equity", detail: "", status: "done" },
+      { id: 102, when: "Feb'26", activity: "Finalize advisor agreements", detail: "", status: "in_progress" },
+      { id: 103, when: "Feb'26", activity: "Finalize Rob/GC agreement", detail: "", status: "in_progress" },
+      { id: 104, when: "Feb'26", activity: "Finalize Naming / Branding", detail: "CMR.AI confirmed", status: "done" },
+      { id: 105, when: "Feb'26", activity: "Establish Company (US — Delaware; Cayman?; European Entity)", detail: "Legal structure TBD with Drew", status: "in_progress" },
+      { id: 106, when: "Feb'26", activity: "Dashboard Requirements Specification", detail: "See MVP Architecture doc", status: "done" },
+      { id: 107, when: "Feb'26", activity: "Plan of Action with Development Partner", detail: "Target initial solution in 6 months? What specific activity needs to happen when? What do we need from Dev Partner (access to data)?", status: "in_progress" },
+      { id: 108, when: "Feb'26", activity: "Finalize 2026 Staffing Plan", detail: "See Headcount Plan tab — 17.8 FTE Y1", status: "in_progress" },
+      { id: 109, when: "Feb'26", activity: "Finalize 2026 Financial Plan assuming 2 Development Partners", detail: "See Revenue Model tab — $1.1M-$1.5M Y1 revenue", status: "in_progress" },
+      { id: 110, when: "Feb'26", activity: "High level financial plan through 2030", detail: "5-year model complete — $9.8M-$35.5M Y5 target", status: "done" },
+      { id: 111, when: "Feb'26", activity: "Finalize Development Partner Pitch Deck", detail: "CMR.AI deck complete — 15 slides", status: "done" },
+    ]},
+    { id: 2, phase: "Fundraising & Partnerships", period: "Mar'26", color: "#c9a84c", items: [
+      { id: 201, when: "Mar'26", activity: "F&F Funding Round", detail: "Target $400-500K (per Drew). Founders $150K + external $300K", status: "upcoming" },
+      { id: 202, when: "Mar'26", activity: "Confirm Development Partners", detail: "SocGen confirmed (Christophe). 2nd partner TBD", status: "in_progress" },
+      { id: 203, when: "Mar'26", activity: "Initiate agreements with Development Partners", detail: "Legal framework, data access, IP ownership", status: "upcoming" },
+      { id: 204, when: "Mar'26", activity: "Finalize Data Requirements / Plan", detail: "What data feeds from dev partners? Format, frequency, access method", status: "upcoming" },
+      { id: 205, when: "Mar'26", activity: "Finalize Infrastructure Plan and initiate", detail: "AWS contracts; Database requirements; On-prem vs cloud for dev partner", status: "upcoming" },
+      { id: 206, when: "Mar'26", activity: "Pre-partner development of AI Agents", detail: "What agents can we build before onsite with dev partners? Portfolio monitoring, news ingestion, alert framework", status: "upcoming" },
+    ]},
+    { id: 3, phase: "Build Phase", period: "Apr-Oct'26", color: "#34d399", items: [
+      { id: 301, when: "Apr'26", activity: "Start with first Development Partner (SocGen)", detail: "Onsite access, data ingestion begins, Tier 1 adapter", status: "upcoming" },
+      { id: 302, when: "May'26", activity: "Start with Second Development Partner", detail: "Who? Need to confirm. Ideally US Tier 1 bank", status: "upcoming" },
+      { id: 303, when: "Apr-Jun'26", activity: "MVP Build Sprint — Core Agent Families", detail: "Portfolio monitoring → Exposure → Limit → Alert → News (see Architecture doc)", status: "upcoming" },
+      { id: 304, when: "Apr-Jun'26", activity: "Integration Layer — AI Schema Discovery", detail: "Tier 1 pre-built + Tier 3 AI universal adapter — competitive moat", status: "upcoming" },
+      { id: 305, when: "Jun-Aug'26", activity: "Dashboard v1 — Streamlit prototype", detail: "Morning briefing, counterparty drilldown, alert center, limit monitor", status: "upcoming" },
+      { id: 306, when: "Aug-Oct'26", activity: "SA-CCR / Basel III Calculations", detail: "EAD, PFE, CVA/DVA, RWA computation engine", status: "upcoming" },
+      { id: 307, when: "Sep-Oct'26", activity: "User Acceptance Testing with Dev Partners", detail: "Iterate based on real user feedback", status: "upcoming" },
+    ]},
+    { id: 4, phase: "Go-Live & Commercialization", period: "Nov'26+", color: "#a78bfa", items: [
+      { id: 401, when: "Nov'26", activity: "Dashboard and AI Agents live with Development Partners", detail: "Full 5-agent suite operational, real data flowing", status: "upcoming" },
+      { id: 402, when: "Nov'26", activity: "Start pitch to second round clients", detail: "Armed with live demo + dev partner testimonials", status: "upcoming" },
+      { id: 403, when: "Nov'26", activity: "Finalize Series A Funding Deck", detail: "Updated metrics, traction proof, client pipeline", status: "upcoming" },
+      { id: 404, when: "Jan'27", activity: "Conduct Series A Funding Round", detail: "Target $4-8M; Req: 4-6 paying clients, $3M+ ARR trajectory", status: "upcoming" },
+      { id: 405, when: "Jan'27", activity: "Start deployment with Second Round clients", detail: "Leverage adapter library from dev partner builds", status: "upcoming" },
+      { id: 406, when: "Mar'27", activity: "Start pitch to 3rd round clients", detail: "Expanding pipeline — US, EU, APAC targets", status: "upcoming" },
+      { id: 407, when: "May'27", activity: "Start deployment with Third Round clients", detail: "Scaling to 7+ active clients", status: "upcoming" },
+    ]},
+    { id: 5, phase: "Product Scope Roadmap", period: "2026-2030", color: "#f59e0b", items: [
+      { id: 501, when: "2026", activity: "Module 1: CCR — Funds (Institutional)", detail: "PRIORITY — Ongoing exposure monitoring, limit utilization, stress tests, margin H/C, CP vs peers, portfolio view", status: "in_progress" },
+      { id: 502, when: "H2 2027", activity: "Module 2: CCR — All CP Types", detail: "Extend to HFs, FIs, Corporates, PTGs", status: "upcoming" },
+      { id: 503, when: "2028", activity: "Module 3: Market Risk", detail: "Trading book risk extension", status: "upcoming" },
+      { id: 504, when: "2029", activity: "Module 4: Liquidity Risk", detail: "Cash flow, funding requirements", status: "upcoming" },
+      { id: 505, when: "2030", activity: "Module 5: Wholesale Credit", detail: "Banking book, complex credits", status: "upcoming" },
+    ]},
   ],
   specs: [
     { id: 1, title: "MVP Architecture & Agent Design", version: "1.0", lastUpdated: "2026-02-09", author: "Team", status: "active", content: "Seven-layer architecture with five core AI agent families.", driveLink: "" },
@@ -900,7 +949,7 @@ const TaskTracker = ({ data, setData }) => {
   const toggleStatus = task => { const next = { todo: "in_progress", in_progress: "done", done: "todo" }; setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === task.id ? { ...t, status: next[t.status] || "todo" } : t) })); };
   const filtered = data.tasks.filter(t => (filter === "all" || t.status === filter) && (filterAssignee === "all" || t.assignee === filterAssignee));
   const byStatus = { todo: filtered.filter(t => t.status === "todo"), in_progress: filtered.filter(t => t.status === "in_progress"), done: filtered.filter(t => t.status === "done") };
-  const modules = ["product", "investor", "crm", "financial", "legal", "hr", "market"];
+  const modules = ["product", "investor", "crm", "financial", "legal", "hr", "market", "timeline"];
 
   return (
     <div>
@@ -1063,6 +1112,177 @@ const HRModule = ({ data, setData }) => {
 };
 
 // ────────────────────────────────────────────
+// TIMELINE / ROADMAP
+// ────────────────────────────────────────────
+const TimelineModule = ({ data, setData }) => {
+  const [editPhase, setEditPhase] = useState(null);
+  const [editItem, setEditItem] = useState(null);
+  const [expandedPhases, setExpandedPhases] = useState({});
+  const roadmap = data.roadmap || [];
+
+  const togglePhase = id => setExpandedPhases(p => ({ ...p, [id]: !p[id] }));
+
+  const savePhase = ph => {
+    setData(d => ({ ...d, roadmap: ph.id && roadmap.find(r => r.id === ph.id) ? d.roadmap.map(r => r.id === ph.id ? { ...r, phase: ph.phase, period: ph.period, color: ph.color } : r) : [...d.roadmap, { ...ph, id: Date.now(), items: [] }] }));
+    setEditPhase(null);
+  };
+
+  const saveItem = (phaseId, item) => {
+    setData(d => ({
+      ...d, roadmap: d.roadmap.map(ph => ph.id === phaseId ? {
+        ...ph, items: item.id && ph.items.find(i => i.id === item.id)
+          ? ph.items.map(i => i.id === item.id ? item : i)
+          : [...ph.items, { ...item, id: Date.now() }]
+      } : ph)
+    }));
+    setEditItem(null);
+  };
+
+  const deleteItem = (phaseId, itemId) => {
+    setData(d => ({ ...d, roadmap: d.roadmap.map(ph => ph.id === phaseId ? { ...ph, items: ph.items.filter(i => i.id !== itemId) } : ph) }));
+    setEditItem(null);
+  };
+
+  const deletePhase = phaseId => {
+    if (confirm("Delete this entire phase and all its items?")) {
+      setData(d => ({ ...d, roadmap: d.roadmap.filter(ph => ph.id !== phaseId) }));
+      setEditPhase(null);
+    }
+  };
+
+  const totalItems = roadmap.reduce((a, ph) => a + ph.items.length, 0);
+  const doneItems = roadmap.reduce((a, ph) => a + ph.items.filter(i => i.status === "done").length, 0);
+  const inProgressItems = roadmap.reduce((a, ph) => a + ph.items.filter(i => i.status === "in_progress").length, 0);
+
+  const statusDot = s => ({ done: T.green, in_progress: T.amber, upcoming: T.textMuted, blocked: T.red }[s] || T.textMuted);
+  const statusLabel = s => ({ done: "Done", in_progress: "In Progress", upcoming: "Upcoming", blocked: "Blocked" }[s] || s);
+
+  return (
+    <div>
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 700, marginBottom: 4 }}>Timeline & Roadmap</h2>
+        <p style={{ color: T.textDim, fontSize: 14 }}>Master plan — from formation through commercialization</p>
+      </div>
+      <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+        <KPI label="Phases" value={roadmap.length} accent={T.accent} />
+        <KPI label="Total Items" value={totalItems} />
+        <KPI label="Done" value={doneItems} sub={totalItems > 0 ? `${Math.round(doneItems / totalItems * 100)}%` : ""} accent={T.green} />
+        <KPI label="In Progress" value={inProgressItems} accent={T.amber} />
+        <KPI label="Upcoming" value={totalItems - doneItems - inProgressItems} accent={T.textMuted} />
+      </div>
+
+      {/* Progress bar */}
+      <Card style={{ marginBottom: 24, padding: 16 }}>
+        <div style={{ display: "flex", gap: 4, height: 28, borderRadius: 6, overflow: "hidden", background: T.surface }}>
+          {roadmap.map(ph => {
+            const done = ph.items.filter(i => i.status === "done").length;
+            const prog = ph.items.filter(i => i.status === "in_progress").length;
+            const total = ph.items.length;
+            if (total === 0) return null;
+            return (
+              <div key={ph.id} style={{ flex: total, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }} title={`${ph.phase}: ${done}/${total} done`}>
+                <div style={{ height: "100%", display: "flex" }}>
+                  <div style={{ width: `${(done / total) * 100}%`, background: ph.color, opacity: 0.9, transition: "width 0.3s" }} />
+                  <div style={{ width: `${(prog / total) * 100}%`, background: ph.color, opacity: 0.4, transition: "width 0.3s" }} />
+                  <div style={{ flex: 1, background: T.border }} />
+                </div>
+                <div style={{ position: "absolute", width: "100%", textAlign: "center", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,0.5)", letterSpacing: "0.03em" }}>{ph.phase.split(" ").slice(0, 2).join(" ")}</div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      <div style={{ marginBottom: 12, display: "flex", justifyContent: "flex-end" }}>
+        <Btn small onClick={() => setEditPhase({ phase: "", period: "", color: "#4f8ff7" })}>{Icons.plus} Add Phase</Btn>
+      </div>
+
+      {/* Phase sections */}
+      {roadmap.map(ph => {
+        const isExpanded = expandedPhases[ph.id] !== false;
+        const done = ph.items.filter(i => i.status === "done").length;
+        return (
+          <div key={ph.id} style={{ marginBottom: 16 }}>
+            <div
+              onClick={() => togglePhase(ph.id)}
+              style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: T.card, border: `1px solid ${T.border}`, borderRadius: isExpanded ? "10px 10px 0 0" : 10, cursor: "pointer", userSelect: "none" }}
+            >
+              <div style={{ width: 14, height: 14, borderRadius: 3, background: ph.color, flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>{ph.phase}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: T.textDim, marginTop: 2 }}>{ph.period} · {done}/{ph.items.length} complete</div>
+              </div>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <button onClick={e => { e.stopPropagation(); setEditPhase(ph); }} style={{ background: "none", border: "none", color: T.textDim, cursor: "pointer", padding: 4 }}>{Icons.edit}</button>
+                <button onClick={e => { e.stopPropagation(); setEditItem({ phaseId: ph.id, when: "", activity: "", detail: "", status: "upcoming" }); }} style={{ background: "none", border: "none", color: T.accent, cursor: "pointer", padding: 4 }}>{Icons.plus}</button>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.textDim} strokeWidth="2" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </div>
+            {isExpanded && (
+              <div style={{ border: `1px solid ${T.border}`, borderTop: "none", borderRadius: "0 0 10px 10px", overflow: "hidden" }}>
+                {ph.items.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setEditItem({ ...item, phaseId: ph.id })}
+                    style={{ display: "grid", gridTemplateColumns: "90px 1fr 1fr 90px", gap: 12, padding: "10px 16px", borderBottom: idx < ph.items.length - 1 ? `1px solid ${T.border}08` : "none", cursor: "pointer", alignItems: "center", transition: "background 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = T.surface}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                  >
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: T.textDim }}>{item.when}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500 }}>{item.activity}</div>
+                    <div style={{ fontSize: 12, color: T.textDim, lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.detail}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: statusDot(item.status), flexShrink: 0 }} />
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: statusDot(item.status) }}>{statusLabel(item.status)}</span>
+                    </div>
+                  </div>
+                ))}
+                {ph.items.length === 0 && (
+                  <div style={{ padding: 20, textAlign: "center", color: T.textMuted, fontSize: 13 }}>No items yet — click + to add</div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Edit Phase Modal */}
+      {editPhase && <Modal title={editPhase.id ? "Edit Phase" : "Add Phase"} onClose={() => setEditPhase(null)}>
+        <FormField label="Phase Name"><Input value={editPhase.phase} onChange={v => setEditPhase({ ...editPhase, phase: v })} placeholder="e.g. Build Phase" /></FormField>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <FormField label="Period"><Input value={editPhase.period} onChange={v => setEditPhase({ ...editPhase, period: v })} placeholder="e.g. Apr-Oct'26" /></FormField>
+          <FormField label="Color">
+            <div style={{ display: "flex", gap: 8, padding: "8px 0" }}>
+              {["#4f8ff7", "#c9a84c", "#34d399", "#a78bfa", "#f59e0b", "#f87171", "#ec4899"].map(c => (
+                <div key={c} onClick={() => setEditPhase({ ...editPhase, color: c })} style={{ width: 28, height: 28, borderRadius: 6, background: c, cursor: "pointer", border: editPhase.color === c ? "2px solid #fff" : "2px solid transparent", transition: "border 0.15s" }} />
+              ))}
+            </div>
+          </FormField>
+        </div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
+          {editPhase.id && <Btn danger onClick={() => deletePhase(editPhase.id)}>{Icons.trash} Delete Phase</Btn>}
+          <Btn onClick={() => setEditPhase(null)}>Cancel</Btn><Btn primary onClick={() => savePhase(editPhase)}>Save</Btn>
+        </div>
+      </Modal>}
+
+      {/* Edit Item Modal */}
+      {editItem && <Modal title={editItem.id ? "Edit Item" : "Add Item"} onClose={() => setEditItem(null)}>
+        <FormField label="Activity"><Input value={editItem.activity} onChange={v => setEditItem({ ...editItem, activity: v })} placeholder="What needs to happen" /></FormField>
+        <FormField label="Detail / Open Questions"><Input textarea value={editItem.detail} onChange={v => setEditItem({ ...editItem, detail: v })} placeholder="Context, dependencies, notes" /></FormField>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <FormField label="When"><Input value={editItem.when} onChange={v => setEditItem({ ...editItem, when: v })} placeholder="e.g. Apr'26 or Apr-Jun'26" /></FormField>
+          <FormField label="Status"><Select value={editItem.status} onChange={v => setEditItem({ ...editItem, status: v })} options={[{ value: "upcoming", label: "Upcoming" }, { value: "in_progress", label: "In Progress" }, { value: "done", label: "Done" }, { value: "blocked", label: "Blocked" }]} /></FormField>
+        </div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
+          {editItem.id && <Btn danger onClick={() => deleteItem(editItem.phaseId, editItem.id)}>{Icons.trash} Delete</Btn>}
+          <Btn onClick={() => setEditItem(null)}>Cancel</Btn><Btn primary onClick={() => saveItem(editItem.phaseId, editItem)}>Save</Btn>
+        </div>
+      </Modal>}
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────
 // MAIN APP
 // ────────────────────────────────────────────
 const MODULES = [
@@ -1073,6 +1293,7 @@ const MODULES = [
   { id: "crm", label: "Client Pipeline", icon: Icons.crm },
   { id: "financial", label: "Financials", icon: Icons.financial },
   { id: "legal", label: "Legal", icon: Icons.legal },
+  { id: "timeline", label: "Timeline", icon: Icons.timeline },
   { id: "tasks", label: "Task Tracker", icon: Icons.tasks },
   { id: "hr", label: "HR & People", icon: Icons.hr },
 ];
@@ -1112,7 +1333,7 @@ export default function App() {
 
   const renderModule = () => {
     const p = { data, setData: updateData };
-    const map = { command: CommandCenter, product: ProductHub, investor: InvestorModule, market: AddressableMarket, crm: CRMModule, financial: FinancialModule, legal: LegalModule, tasks: TaskTracker, hr: HRModule };
+    const map = { command: CommandCenter, product: ProductHub, investor: InvestorModule, market: AddressableMarket, crm: CRMModule, financial: FinancialModule, legal: LegalModule, timeline: TimelineModule, tasks: TaskTracker, hr: HRModule };
     const C = map[activeModule] || CommandCenter;
     return <C {...p} />;
   };
