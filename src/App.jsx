@@ -100,21 +100,11 @@ const defaultData = {
     { id: 3, company: "TP ICAP", contact: "TBD", role: "Risk", stage: "warm_intro", owner: "Alexia", lastContact: "2026-01-15", notes: "Alexia's network.", dealValue: 500000, probability: 15, marketId: 9, comments: [] },
   ],
   financials: {
-    runway: 8, monthlyBurn: 45000, cashOnHand: 120000,
+    runway: 0, monthlyBurn: 0, cashOnHand: 0,
     ffTarget: 450000, ffCommitted: 50000, seedTarget: 4000000,
-    yearlyProjections: [
-      { year: "Y1", arr: 500000, customers: 1, burn: 540000 },
-      { year: "Y2", arr: 3000000, customers: 4, burn: 1800000 },
-      { year: "Y3", arr: 8000000, customers: 10, burn: 4000000 },
-      { year: "Y4", arr: 15000000, customers: 20, burn: 8000000 },
-      { year: "Y5", arr: 22000000, customers: 35, burn: 12000000 },
-    ],
   },
   financialDocs: [
-    { id: 1, title: "Financial Model — 5 Year Projections", driveLink: "https://docs.google.com/spreadsheets/d/1DnV6ExU8zyHENN0FgxDDjkVrJO7nzEqj/edit?usp=drive_link&ouid=109350579601617179499&rtpof=true&sd=true", description: "Full financial model with ARR, burn, headcount, and scenario analysis" },
-    { id: 2, title: "Cap Table & Equity Model", driveLink: "", description: "Founder splits, option pool, dilution scenarios across F&F and Seed" },
-    { id: 3, title: "Unit Economics Model", driveLink: "", description: "Per-client economics: ACV, CAC, LTV, payback period" },
-    { id: 4, title: "Fundraise Tracker", driveLink: "", description: "F&F and Seed round tracking — commitments, terms, close timeline" },
+    { id: 1, title: "Financial Model", driveLink: "https://docs.google.com/spreadsheets/d/1DnV6ExU8zyHENN0FgxDDjkVrJO7nzEqj/edit?usp=drive_link&ouid=109350579601617179499&rtpof=true&sd=true", description: "Full financial model — ARR, burn, headcount, scenario analysis" },
   ],
   legalDocs: [
     { id: 1, title: "Certificate of Incorporation", type: "corporate", status: "complete", driveLink: "", dueDate: "" },
@@ -293,10 +283,18 @@ const ProbBar = ({ value }) => (
 const CommandCenter = ({ data, setData }) => {
   const { milestones, tasks, financials, prospects, team } = data;
   const doneTasks = tasks.filter(t => t.status === "done").length;
-  const runway = Math.round((financials.cashOnHand + financials.ffCommitted) / financials.monthlyBurn);
-  const ffPct = Math.round((financials.ffCommitted / financials.ffTarget) * 100);
+  const runway = financials.monthlyBurn > 0 ? Math.round((financials.cashOnHand + financials.ffCommitted) / financials.monthlyBurn) : null;
+  const ffPct = financials.ffTarget > 0 ? Math.round((financials.ffCommitted / financials.ffTarget) * 100) : 0;
   const pipelineValue = prospects.reduce((a, p) => a + (p.dealValue || 0), 0);
   const weightedPipeline = prospects.reduce((a, p) => a + (p.dealValue || 0) * ((p.probability || 0) / 100), 0);
+
+  // Live pipeline by stage for chart
+  const stageOrder = ["cold", "warm_intro", "first_meeting", "pilot_discussion", "pilot_committed", "live_client"];
+  const pipelineByStage = stageOrder.map(s => ({
+    name: statusMap[s]?.l || s,
+    value: prospects.filter(p => p.stage === s).reduce((a, p) => a + (p.dealValue || 0), 0),
+    count: prospects.filter(p => p.stage === s).length,
+  })).filter(s => s.count > 0);
 
   return (
     <div>
@@ -305,7 +303,7 @@ const CommandCenter = ({ data, setData }) => {
         <p style={{ color: T.textDim, fontSize: 14 }}>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
-        <KPI label="Runway" value={`${runway}mo`} sub={`$${(financials.cashOnHand / 1000).toFixed(0)}K cash`} accent={runway < 6 ? T.red : T.green} />
+        {runway !== null && <KPI label="Runway" value={`${runway}mo`} sub={`$${(financials.cashOnHand / 1000).toFixed(0)}K cash`} accent={runway < 6 ? T.red : T.green} />}
         <KPI label="F&F Raise" value={`${ffPct}%`} sub={`$${(financials.ffCommitted / 1000).toFixed(0)}K / $${(financials.ffTarget / 1000).toFixed(0)}K`} accent={T.gold} />
         <KPI label="Pipeline" value={`$${(pipelineValue / 1e6).toFixed(1)}M`} sub={`Weighted: $${(weightedPipeline / 1e6).toFixed(1)}M`} accent={T.accent} />
         <KPI label="Tasks" value={`${doneTasks}/${tasks.length}`} sub={`${tasks.filter(t => t.priority === "critical" || t.priority === "high").length} high priority`} />
@@ -323,17 +321,20 @@ const CommandCenter = ({ data, setData }) => {
           ))}
         </Card>
         <Card>
-          <SectionTitle>Revenue Trajectory</SectionTitle>
-          <ResponsiveContainer width="100%" height={190}>
-            <AreaChart data={financials.yearlyProjections}>
-              <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={T.accent} stopOpacity={0.3} /><stop offset="100%" stopColor={T.accent} stopOpacity={0} /></linearGradient></defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis dataKey="year" stroke={T.textMuted} fontSize={11} fontFamily="'IBM Plex Mono', monospace" />
-              <YAxis stroke={T.textMuted} fontSize={10} fontFamily="'IBM Plex Mono', monospace" tickFormatter={v => `$${v / 1e6}M`} />
-              <Tooltip contentStyle={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12 }} formatter={v => [`$${(v / 1e6).toFixed(1)}M`]} />
-              <Area type="monotone" dataKey="arr" stroke={T.accent} fill="url(#ag)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
+          <SectionTitle>Client Pipeline by Stage</SectionTitle>
+          {pipelineByStage.length > 0 ? (
+            <ResponsiveContainer width="100%" height={190}>
+              <BarChart data={pipelineByStage} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+                <XAxis type="number" stroke={T.textMuted} fontSize={10} fontFamily="'IBM Plex Mono', monospace" tickFormatter={v => `$${(v / 1e6).toFixed(1)}M`} />
+                <YAxis type="category" dataKey="name" stroke={T.textMuted} fontSize={11} width={100} fontFamily="'IBM Plex Mono', monospace" />
+                <Tooltip contentStyle={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12 }} formatter={v => [`$${(v / 1e6).toFixed(1)}M`]} />
+                <Bar dataKey="value" fill={T.accent} radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: 190, display: "flex", alignItems: "center", justifyContent: "center", color: T.textMuted, fontSize: 13 }}>No prospects in pipeline yet</div>
+          )}
         </Card>
       </div>
       <Card>
@@ -756,25 +757,42 @@ const FinancialModule = ({ data, setData }) => {
   const [editDoc, setEditDoc] = useState(null);
   const financialDocs = data.financialDocs || [];
   const weightedPipeline = (data.prospects || []).reduce((a, p) => a + (p.dealValue || 0) * ((p.probability || 0) / 100), 0);
+  const totalPipeline = (data.prospects || []).reduce((a, p) => a + (p.dealValue || 0), 0);
   const updateF = (k, v) => setData(d => ({ ...d, financials: { ...d.financials, [k]: v } }));
   const saveDoc = doc => { setData(d => ({ ...d, financialDocs: doc.id ? (d.financialDocs || []).map(x => x.id === doc.id ? doc : x) : [...(d.financialDocs || []), { ...doc, id: Date.now() }] })); setEditDoc(null); };
+  const runway = f.monthlyBurn > 0 ? Math.round((f.cashOnHand + f.ffCommitted) / f.monthlyBurn) : "—";
 
   return (
     <div>
-      <div style={{ marginBottom: 28 }}><h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 700, marginBottom: 4 }}>Financial Projections</h2><p style={{ color: T.textDim, fontSize: 14 }}>Live model — auto-feeds from CRM & raise data</p></div>
+      <div style={{ marginBottom: 28 }}><h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 700, marginBottom: 4 }}>Financials</h2><p style={{ color: T.textDim, fontSize: 14 }}>Live data from CRM pipeline · Enter your actuals below</p></div>
+
+      {/* KPIs — only live/real data */}
       <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-        <KPI label="Cash" value={`$${(f.cashOnHand / 1000).toFixed(0)}K`} accent={f.cashOnHand < 100000 ? T.red : T.green} />
-        <KPI label="Monthly Burn" value={`$${(f.monthlyBurn / 1000).toFixed(0)}K`} />
-        <KPI label="Runway" value={`${Math.round((f.cashOnHand + f.ffCommitted) / f.monthlyBurn)}mo`} accent={T.accent} />
-        <KPI label="Wtd Pipeline" value={`$${(weightedPipeline / 1e6).toFixed(1)}M`} sub="from CRM" accent={T.gold} />
+        <KPI label="F&F Target" value={`$${(f.ffTarget / 1000).toFixed(0)}K`} accent={T.gold} />
+        <KPI label="F&F Committed" value={`$${(f.ffCommitted / 1000).toFixed(0)}K`} sub={`${Math.round(f.ffCommitted / f.ffTarget * 100)}% of target`} accent={f.ffCommitted >= f.ffTarget ? T.green : T.amber} />
+        <KPI label="Wtd Pipeline" value={`$${(weightedPipeline / 1e6).toFixed(1)}M`} sub={`$${(totalPipeline / 1e6).toFixed(1)}M total · from CRM`} accent={T.accent} />
+        {f.monthlyBurn > 0 && <KPI label="Runway" value={`${runway}mo`} sub={`$${(f.cashOnHand / 1000).toFixed(0)}K cash · $${(f.monthlyBurn / 1000).toFixed(0)}K/mo burn`} accent={runway !== "—" && runway < 6 ? T.red : T.green} />}
       </div>
 
-      {/* Embedded Financial Model */}
+      {/* Editable actuals — user enters real numbers */}
+      <Card style={{ marginBottom: 24 }}>
+        <SectionTitle>Your Numbers</SectionTitle>
+        <p style={{ fontSize: 12, color: T.textMuted, marginBottom: 14 }}>Enter your real figures. Runway auto-calculates.</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
+          <FormField label="Cash on Hand ($)"><Input type="number" value={f.cashOnHand || ""} onChange={v => updateF("cashOnHand", parseInt(v) || 0)} placeholder="0" /></FormField>
+          <FormField label="Monthly Burn ($)"><Input type="number" value={f.monthlyBurn || ""} onChange={v => updateF("monthlyBurn", parseInt(v) || 0)} placeholder="0" /></FormField>
+          <FormField label="F&F Target ($)"><Input type="number" value={f.ffTarget} onChange={v => updateF("ffTarget", parseInt(v) || 0)} /></FormField>
+          <FormField label="F&F Committed ($)"><Input type="number" value={f.ffCommitted} onChange={v => updateF("ffCommitted", parseInt(v) || 0)} /></FormField>
+        </div>
+      </Card>
+
+      {/* Embedded Financial Model — live from Google Sheets */}
       <Card style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <SectionTitle>Financial Model — Live</SectionTitle>
           <a href="https://docs.google.com/spreadsheets/d/1DnV6ExU8zyHENN0FgxDDjkVrJO7nzEqj/edit?usp=drive_link&ouid=109350579601617179499&rtpof=true&sd=true" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12, color: T.accent, textDecoration: "none", fontFamily: "'Outfit', sans-serif" }}>{Icons.link} Open Full Sheet</a>
         </div>
+        <p style={{ fontSize: 12, color: T.textMuted, marginBottom: 12 }}>To enable the live embed: open the spreadsheet in Google Drive → File → Save as Google Sheets. Then set sharing to "Anyone with the link."</p>
         <iframe
           src="https://docs.google.com/spreadsheets/d/1DnV6ExU8zyHENN0FgxDDjkVrJO7nzEqj/preview"
           style={{ width: "100%", height: 500, border: `1px solid ${T.border}`, borderRadius: 8, background: T.surface }}
@@ -783,58 +801,23 @@ const FinancialModule = ({ data, setData }) => {
         />
       </Card>
 
-      {/* Google Drive Models */}
-      <div style={{ marginBottom: 24 }}>
-        <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
-          <a href="https://drive.google.com/drive/folders/1o5Rfwq4PiLTs2zAvrH9Nkds9aZa5UyUG" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12, color: T.accent, textDecoration: "none", fontFamily: "'Outfit', sans-serif" }}>{Icons.link} Open Drive</a>
-          <Btn small onClick={() => setEditDoc({ title: "", driveLink: "", description: "" })}>{Icons.plus} Add Model</Btn>
-        </div>}>Financial Models (Google Drive)</SectionTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
-          {financialDocs.map(doc => (
-            <Card key={doc.id} style={{ padding: 16, cursor: "pointer" }} onClick={() => setEditDoc(doc)}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.3 }}>{doc.title}</div>
-                {doc.driveLink ? <span style={{ color: T.green, flexShrink: 0 }}>{Icons.check}</span> : <span style={{ color: T.textMuted, flexShrink: 0 }}>{Icons.link}</span>}
-              </div>
-              <div style={{ fontSize: 12, color: T.textDim, lineHeight: 1.4, marginBottom: 8 }}>{doc.description}</div>
-              {doc.driveLink ? <a href={doc.driveLink} target="_blank" rel="noopener" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: T.accent, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace" }}>Open in Drive →</a> : <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "'IBM Plex Mono', monospace" }}>No link yet</span>}
-            </Card>
-          ))}
-        </div>
+      {/* Additional Drive models */}
+      <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
+        <a href="https://drive.google.com/drive/folders/1o5Rfwq4PiLTs2zAvrH9Nkds9aZa5UyUG" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12, color: T.accent, textDecoration: "none", fontFamily: "'Outfit', sans-serif" }}>{Icons.link} Open Drive</a>
+        <Btn small onClick={() => setEditDoc({ title: "", driveLink: "", description: "" })}>{Icons.plus} Add Model</Btn>
+      </div>}>Linked Documents</SectionTitle>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
+        {financialDocs.map(doc => (
+          <Card key={doc.id} style={{ padding: 16, cursor: "pointer" }} onClick={() => setEditDoc(doc)}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.3 }}>{doc.title}</div>
+              {doc.driveLink ? <span style={{ color: T.green, flexShrink: 0 }}>{Icons.check}</span> : <span style={{ color: T.textMuted, flexShrink: 0 }}>{Icons.link}</span>}
+            </div>
+            <div style={{ fontSize: 12, color: T.textDim, lineHeight: 1.4, marginBottom: 8 }}>{doc.description}</div>
+            {doc.driveLink ? <a href={doc.driveLink} target="_blank" rel="noopener" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: T.accent, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace" }}>Open in Drive →</a> : <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "'IBM Plex Mono', monospace" }}>No link yet</span>}
+          </Card>
+        ))}
       </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
-        <Card>
-          <SectionTitle>Key Inputs</SectionTitle>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <FormField label="Cash on Hand ($)"><Input type="number" value={f.cashOnHand} onChange={v => updateF("cashOnHand", parseInt(v) || 0)} /></FormField>
-            <FormField label="Monthly Burn ($)"><Input type="number" value={f.monthlyBurn} onChange={v => updateF("monthlyBurn", parseInt(v) || 0)} /></FormField>
-            <FormField label="F&F Target ($)"><Input type="number" value={f.ffTarget} onChange={v => updateF("ffTarget", parseInt(v) || 0)} /></FormField>
-            <FormField label="F&F Committed ($)"><Input type="number" value={f.ffCommitted} onChange={v => updateF("ffCommitted", parseInt(v) || 0)} /></FormField>
-          </div>
-        </Card>
-        <Card>
-          <SectionTitle>ARR vs Burn</SectionTitle>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={f.yearlyProjections}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis dataKey="year" stroke={T.textMuted} fontSize={11} fontFamily="'IBM Plex Mono', monospace" />
-              <YAxis stroke={T.textMuted} fontSize={10} fontFamily="'IBM Plex Mono', monospace" tickFormatter={v => `$${v / 1e6}M`} />
-              <Tooltip contentStyle={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12 }} formatter={v => [`$${(v / 1e6).toFixed(1)}M`]} />
-              <Bar dataKey="arr" fill={T.accent} radius={[4, 4, 0, 0]} name="ARR" />
-              <Bar dataKey="burn" fill={T.red} radius={[4, 4, 0, 0]} opacity={0.5} name="Burn" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-      <Card>
-        <SectionTitle>5-Year Projections</SectionTitle>
-        <Table columns={[
-          { label: "Year", key: "year" }, { label: "ARR", render: r => `$${(r.arr / 1e6).toFixed(1)}M`, nowrap: true },
-          { label: "Customers", key: "customers", nowrap: true }, { label: "Burn", render: r => `$${(r.burn / 1e6).toFixed(1)}M`, nowrap: true },
-          { label: "Margin", render: r => { const m = Math.round((1 - r.burn / (r.arr || 1)) * 100); return <span style={{ color: m > 0 ? T.green : T.red }}>{m}%</span>; }, nowrap: true },
-        ]} data={f.yearlyProjections} />
-      </Card>
 
       {editDoc && <Modal title={editDoc.id ? "Edit Model" : "Add Financial Model"} onClose={() => setEditDoc(null)}>
         <FormField label="Title"><Input value={editDoc.title} onChange={v => setEditDoc({ ...editDoc, title: v })} /></FormField>
