@@ -418,10 +418,8 @@ const ProductHub = ({ data, setData }) => {
 // INVESTOR MODULE
 // ────────────────────────────────────────────
 const InvestorModule = ({ data, setData }) => {
-  const [editSlide, setEditSlide] = useState(null);
   const [editInv, setEditInv] = useState(null);
   const totalCommitted = data.pitchPipeline.filter(p => p.stage === "committed").reduce((a, p) => a + p.amount, 0);
-  const saveSlide = s => { setData(d => ({ ...d, deckSlides: s.id ? d.deckSlides.map(x => x.id === s.id ? s : x) : [...d.deckSlides, { ...s, id: Date.now(), order: d.deckSlides.length + 1 }] })); setEditSlide(null); };
   const saveInv = inv => { setData(d => ({ ...d, pitchPipeline: inv.id ? d.pitchPipeline.map(x => x.id === inv.id ? inv : x) : [...d.pitchPipeline, { ...inv, id: Date.now() }] })); setEditInv(null); };
 
   return (
@@ -431,23 +429,32 @@ const InvestorModule = ({ data, setData }) => {
         <KPI label="F&F Target" value={`$${(data.financials.ffTarget / 1000).toFixed(0)}K`} accent={T.gold} />
         <KPI label="Committed" value={`$${(totalCommitted / 1000).toFixed(0)}K`} sub={`${Math.round(totalCommitted / data.financials.ffTarget * 100)}%`} accent={totalCommitted >= data.financials.ffTarget ? T.green : T.amber} />
         <KPI label="Pipeline" value={data.pitchPipeline.length} sub={`${data.pitchPipeline.filter(p => p.stage === "committed").length} committed`} />
-        <KPI label="Deck" value={`${data.deckSlides.length} slides`} accent={T.accent} />
+        <KPI label="Deck" value={data.investorDeckLink ? "Linked" : "—"} accent={data.investorDeckLink ? T.green : T.textMuted} />
       </div>
       <div style={{ marginBottom: 24 }}>
-        <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
-          {data.investorDeckLink ? <a href={data.investorDeckLink} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12, color: T.accent, textDecoration: "none", fontFamily: "'Outfit', sans-serif" }}>{Icons.link} Open Deck</a> : null}
-          <Btn small onClick={() => { const link = prompt("Paste Google Drive link for investor deck:", data.investorDeckLink || ""); if (link !== null) setData(d => ({ ...d, investorDeckLink: link })); }}>{Icons.link} {data.investorDeckLink ? "Edit Link" : "Add Drive Link"}</Btn>
-          <Btn small onClick={() => setEditSlide({ title: "", content: "", notes: "" })}>{Icons.plus} Add Slide</Btn>
-        </div>}>Investor Deck</SectionTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
-          {data.deckSlides.sort((a, b) => a.order - b.order).map(s => (
-            <Card key={s.id} onClick={() => setEditSlide(s)} style={{ cursor: "pointer", padding: 16 }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: T.accent, marginBottom: 4 }}>SLIDE {s.order}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{s.title}</div>
-              <div style={{ fontSize: 11, color: T.textDim, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{s.content}</div>
-            </Card>
-          ))}
-        </div>
+        <SectionTitle action={<Btn small onClick={() => { const link = prompt("Paste Google Drive link for investor deck:", data.investorDeckLink || ""); if (link !== null) setData(d => ({ ...d, investorDeckLink: link })); }}>{Icons.link} {data.investorDeckLink ? "Edit Link" : "Add Drive Link"}</Btn>}>Investor Deck</SectionTitle>
+        {data.investorDeckLink ? (
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>CMR.AI Investor Deck</div>
+                <div style={{ fontSize: 12, color: T.textDim }}>Live from Google Drive — always up to date</div>
+              </div>
+              <a href={data.investorDeckLink} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", background: T.accent, color: "#fff", borderRadius: 6, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>{Icons.link} Open Deck</a>
+            </div>
+            <iframe
+              src={data.investorDeckLink.replace(/\/edit.*/, '/preview')}
+              style={{ width: "100%", height: 450, border: `1px solid ${T.border}`, borderRadius: 8, background: T.surface }}
+              title="Investor Deck"
+              allow="autoplay"
+            />
+          </Card>
+        ) : (
+          <Card style={{ padding: 40, textAlign: "center" }}>
+            <div style={{ color: T.textMuted, fontSize: 14, marginBottom: 12 }}>No deck linked yet</div>
+            <Btn onClick={() => { const link = prompt("Paste Google Drive link for investor deck:"); if (link) setData(d => ({ ...d, investorDeckLink: link })); }}>Link Google Drive Deck</Btn>
+          </Card>
+        )}
       </div>
       <SectionTitle action={<Btn small onClick={() => setEditInv({ name: "", contact: "", stage: "intro", amount: 0, notes: "", lastContact: new Date().toISOString().slice(0, 10) })}>{Icons.plus} Add Investor</Btn>}>Pitch Pipeline</SectionTitle>
       <Table columns={[
@@ -457,15 +464,6 @@ const InvestorModule = ({ data, setData }) => {
         { label: "Last Contact", key: "lastContact", nowrap: true },
         { label: "", render: r => <button onClick={e => { e.stopPropagation(); setEditInv(r); }} style={{ background: "none", border: "none", color: T.textDim, cursor: "pointer" }}>{Icons.edit}</button> },
       ]} data={data.pitchPipeline} onRowClick={r => setEditInv(r)} />
-      {editSlide && <Modal title={editSlide.id ? `Edit Slide ${editSlide.order}` : "New Slide"} onClose={() => setEditSlide(null)}>
-        <FormField label="Title"><Input value={editSlide.title} onChange={v => setEditSlide({ ...editSlide, title: v })} /></FormField>
-        <FormField label="Content"><Input textarea value={editSlide.content} onChange={v => setEditSlide({ ...editSlide, content: v })} /></FormField>
-        <FormField label="Speaker Notes"><Input textarea value={editSlide.notes} onChange={v => setEditSlide({ ...editSlide, notes: v })} /></FormField>
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-          {editSlide.id && <Btn danger onClick={() => { setData(d => ({ ...d, deckSlides: d.deckSlides.filter(x => x.id !== editSlide.id) })); setEditSlide(null); }}>{Icons.trash} Delete</Btn>}
-          <Btn onClick={() => setEditSlide(null)}>Cancel</Btn><Btn primary onClick={() => saveSlide(editSlide)}>Save</Btn>
-        </div>
-      </Modal>}
       {editInv && <Modal title={editInv.id ? "Edit Investor" : "Add Investor"} onClose={() => setEditInv(null)}>
         <FormField label="Name"><Input value={editInv.name} onChange={v => setEditInv({ ...editInv, name: v })} /></FormField>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
