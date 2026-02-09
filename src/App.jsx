@@ -54,6 +54,7 @@ const defaultData = {
     { id: 2, date: "2026-02-08", decision: "PostgreSQL with JSONB over pure NoSQL", rationale: "Relational for core entities + flexibility for evolving schemas", decidedBy: "Team", status: "approved" },
     { id: 3, date: "2026-02-07", decision: "Anthropic Claude as primary LLM", rationale: "Superior reasoning for complex CCR analysis tasks", decidedBy: "Miles", status: "approved" },
   ],
+  investorDeckLink: "",
   deckSlides: [
     { id: 1, order: 1, title: "Cover", content: "CMR.AI — AI-Native Counterparty Credit Risk Intelligence", notes: "" },
     { id: 2, order: 2, title: "The Problem", content: "$65B market plagued by manual workflows. Analysts spend 70% of time on data gathering.", notes: "" },
@@ -433,7 +434,11 @@ const InvestorModule = ({ data, setData }) => {
         <KPI label="Deck" value={`${data.deckSlides.length} slides`} accent={T.accent} />
       </div>
       <div style={{ marginBottom: 24 }}>
-        <SectionTitle action={<Btn small onClick={() => setEditSlide({ title: "", content: "", notes: "" })}>{Icons.plus} Add Slide</Btn>}>Investor Deck</SectionTitle>
+        <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
+          {data.investorDeckLink ? <a href={data.investorDeckLink} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12, color: T.accent, textDecoration: "none", fontFamily: "'Outfit', sans-serif" }}>{Icons.link} Open Deck</a> : null}
+          <Btn small onClick={() => { const link = prompt("Paste Google Drive link for investor deck:", data.investorDeckLink || ""); if (link !== null) setData(d => ({ ...d, investorDeckLink: link })); }}>{Icons.link} {data.investorDeckLink ? "Edit Link" : "Add Drive Link"}</Btn>
+          <Btn small onClick={() => setEditSlide({ title: "", content: "", notes: "" })}>{Icons.plus} Add Slide</Btn>
+        </div>}>Investor Deck</SectionTitle>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
           {data.deckSlides.sort((a, b) => a.order - b.order).map(s => (
             <Card key={s.id} onClick={() => setEditSlide(s)} style={{ cursor: "pointer", padding: 16 }}>
