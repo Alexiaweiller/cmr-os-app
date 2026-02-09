@@ -110,6 +110,12 @@ const defaultData = {
       { year: "Y5", arr: 22000000, customers: 35, burn: 12000000 },
     ],
   },
+  financialDocs: [
+    { id: 1, title: "Financial Model — 5 Year Projections", driveLink: "https://docs.google.com/spreadsheets/d/1DnV6ExU8zyHENN0FgxDDjkVrJO7nzEqj/edit?usp=drive_link&ouid=109350579601617179499&rtpof=true&sd=true", description: "Full financial model with ARR, burn, headcount, and scenario analysis" },
+    { id: 2, title: "Cap Table & Equity Model", driveLink: "", description: "Founder splits, option pool, dilution scenarios across F&F and Seed" },
+    { id: 3, title: "Unit Economics Model", driveLink: "", description: "Per-client economics: ACV, CAC, LTV, payback period" },
+    { id: 4, title: "Fundraise Tracker", driveLink: "", description: "F&F and Seed round tracking — commitments, terms, close timeline" },
+  ],
   legalDocs: [
     { id: 1, title: "Certificate of Incorporation", type: "corporate", status: "complete", driveLink: "", dueDate: "" },
     { id: 2, title: "Founder Agreement", type: "corporate", status: "in_progress", driveLink: "", dueDate: "2026-02-28" },
@@ -747,8 +753,11 @@ const CRMModule = ({ data, setData }) => {
 // ────────────────────────────────────────────
 const FinancialModule = ({ data, setData }) => {
   const f = data.financials;
+  const [editDoc, setEditDoc] = useState(null);
+  const financialDocs = data.financialDocs || [];
   const weightedPipeline = (data.prospects || []).reduce((a, p) => a + (p.dealValue || 0) * ((p.probability || 0) / 100), 0);
   const updateF = (k, v) => setData(d => ({ ...d, financials: { ...d.financials, [k]: v } }));
+  const saveDoc = doc => { setData(d => ({ ...d, financialDocs: doc.id ? (d.financialDocs || []).map(x => x.id === doc.id ? doc : x) : [...(d.financialDocs || []), { ...doc, id: Date.now() }] })); setEditDoc(null); };
 
   return (
     <div>
@@ -759,6 +768,27 @@ const FinancialModule = ({ data, setData }) => {
         <KPI label="Runway" value={`${Math.round((f.cashOnHand + f.ffCommitted) / f.monthlyBurn)}mo`} accent={T.accent} />
         <KPI label="Wtd Pipeline" value={`$${(weightedPipeline / 1e6).toFixed(1)}M`} sub="from CRM" accent={T.gold} />
       </div>
+
+      {/* Google Drive Models */}
+      <div style={{ marginBottom: 24 }}>
+        <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
+          <a href="https://drive.google.com/drive/folders/1o5Rfwq4PiLTs2zAvrH9Nkds9aZa5UyUG" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 12, color: T.accent, textDecoration: "none", fontFamily: "'Outfit', sans-serif" }}>{Icons.link} Open Drive</a>
+          <Btn small onClick={() => setEditDoc({ title: "", driveLink: "", description: "" })}>{Icons.plus} Add Model</Btn>
+        </div>}>Financial Models (Google Drive)</SectionTitle>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
+          {financialDocs.map(doc => (
+            <Card key={doc.id} style={{ padding: 16, cursor: "pointer" }} onClick={() => setEditDoc(doc)}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.3 }}>{doc.title}</div>
+                {doc.driveLink ? <span style={{ color: T.green, flexShrink: 0 }}>{Icons.check}</span> : <span style={{ color: T.textMuted, flexShrink: 0 }}>{Icons.link}</span>}
+              </div>
+              <div style={{ fontSize: 12, color: T.textDim, lineHeight: 1.4, marginBottom: 8 }}>{doc.description}</div>
+              {doc.driveLink ? <a href={doc.driveLink} target="_blank" rel="noopener" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: T.accent, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace" }}>Open in Drive →</a> : <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "'IBM Plex Mono', monospace" }}>No link yet</span>}
+            </Card>
+          ))}
+        </div>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
         <Card>
           <SectionTitle>Key Inputs</SectionTitle>
@@ -791,6 +821,16 @@ const FinancialModule = ({ data, setData }) => {
           { label: "Margin", render: r => { const m = Math.round((1 - r.burn / (r.arr || 1)) * 100); return <span style={{ color: m > 0 ? T.green : T.red }}>{m}%</span>; }, nowrap: true },
         ]} data={f.yearlyProjections} />
       </Card>
+
+      {editDoc && <Modal title={editDoc.id ? "Edit Model" : "Add Financial Model"} onClose={() => setEditDoc(null)}>
+        <FormField label="Title"><Input value={editDoc.title} onChange={v => setEditDoc({ ...editDoc, title: v })} /></FormField>
+        <FormField label="Description"><Input textarea value={editDoc.description} onChange={v => setEditDoc({ ...editDoc, description: v })} /></FormField>
+        <FormField label="Google Drive Link"><DriveLink link={editDoc.driveLink} onChange={v => setEditDoc({ ...editDoc, driveLink: v })} /></FormField>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
+          {editDoc.id && <Btn danger onClick={() => { setData(d => ({ ...d, financialDocs: (d.financialDocs || []).filter(x => x.id !== editDoc.id) })); setEditDoc(null); }}>{Icons.trash} Delete</Btn>}
+          <Btn onClick={() => setEditDoc(null)}>Cancel</Btn><Btn primary onClick={() => saveDoc(editDoc)}>Save</Btn>
+        </div>
+      </Modal>}
     </div>
   );
 };
